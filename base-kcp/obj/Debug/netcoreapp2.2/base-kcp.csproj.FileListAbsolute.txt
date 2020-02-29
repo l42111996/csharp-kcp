@@ -1,0 +1,14 @@
+/Users/king/Documents/workspace/oschinaworkspace/csharp-kcp/base-kcp/bin/Debug/netcoreapp2.2/base-kcp.deps.json
+/Users/king/Documents/workspace/oschinaworkspace/csharp-kcp/base-kcp/bin/Debug/netcoreapp2.2/base-kcp.runtimeconfig.json
+/Users/king/Documents/workspace/oschinaworkspace/csharp-kcp/base-kcp/bin/Debug/netcoreapp2.2/base-kcp.runtimeconfig.dev.json
+/Users/king/Documents/workspace/oschinaworkspace/csharp-kcp/base-kcp/bin/Debug/netcoreapp2.2/base-kcp.dll
+/Users/king/Documents/workspace/oschinaworkspace/csharp-kcp/base-kcp/bin/Debug/netcoreapp2.2/base-kcp.pdb
+/Users/king/Documents/workspace/oschinaworkspace/csharp-kcp/base-kcp/obj/Debug/netcoreapp2.2/base-kcp.csprojAssemblyReference.cache
+/Users/king/Documents/workspace/oschinaworkspace/csharp-kcp/base-kcp/obj/Debug/netcoreapp2.2/base-kcp.csproj.CoreCompileInputs.cache
+/Users/king/Documents/workspace/oschinaworkspace/csharp-kcp/base-kcp/obj/Debug/netcoreapp2.2/base-kcp.AssemblyInfoInputs.cache
+/Users/king/Documents/workspace/oschinaworkspace/csharp-kcp/base-kcp/obj/Debug/netcoreapp2.2/base-kcp.AssemblyInfo.cs
+/Users/king/Documents/workspace/oschinaworkspace/csharp-kcp/base-kcp/obj/Debug/netcoreapp2.2/base-kcp.dll
+/Users/king/Documents/workspace/oschinaworkspace/csharp-kcp/base-kcp/obj/Debug/netcoreapp2.2/base-kcp.pdb
+/Users/king/Documents/workspace/oschinaworkspace/csharp-kcp/base-kcp/bin/Debug/netcoreapp2.2/fec.dll
+/Users/king/Documents/workspace/oschinaworkspace/csharp-kcp/base-kcp/bin/Debug/netcoreapp2.2/fec.pdb
+/Users/king/Documents/workspace/oschinaworkspace/csharp-kcp/base-kcp/obj/Debug/netcoreapp2.2/base-kcp.csproj.CopyComplete

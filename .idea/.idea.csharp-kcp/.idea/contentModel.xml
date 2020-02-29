@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ContentModelStore">
+    <e p="$PROJECT_DIR$" t="IncludeFlat">
+      <e p="base-kcp" t="IncludeRecursive">
+        <e p="AbstractPoolObject.cs" t="Include" />
+        <e p="base-kcp.csproj" t="IncludeRecursive" />
+        <e p="bin" t="ExcludeRecursive" />
+        <e p="DelayPacket.cs" t="Include" />
+        <e p="fec" t="Include">
+          <e p="ByteBufCodingLoop.cs" t="Include" />
+          <e p="ByteBufCodingLoopBase.cs" t="Include" />
+          <e p="Fec.cs" t="Include" />
+          <e p="FecDecode.cs" t="Include" />
+          <e p="FecEncode.cs" t="Include" />
+          <e p="FecExpansion.cs" t="Include" />
+          <e p="FecPacket.cs" t="Include" />
+          <e p="InputOutputByteBufTableCodingLoop.cs" t="Include" />
+          <e p="reedsolomon_csharp.dll" t="Include" />
+          <e p="Snmp.cs" t="Include" />
+        </e>
+        <e p="Kcp.cs" t="Include" />
+        <e p="KcpOutput.cs" t="Include" />
+        <e p="KcpUntils.cs" t="Include" />
+        <e p="LatencySimulator.cs" t="Include" />
+        <e p="obj" t="ExcludeRecursive">
+          <e p="Debug" t="Include">
+            <e p="netcoreapp2.2" t="Include">
+              <e p="base-kcp.AssemblyInfo.cs" t="Include" />
+            </e>
+          </e>
+          <e p="reedsolomon_csharp.dll" t="Include" />
+          <e p="Release" t="Include">
+            <e p="netcoreapp2.2" t="Include" />
+          </e>
+        </e>
+        <e p="ObjectPool.cs" t="Include" />
+        <e p="Program.cs" t="Include" />
+        <e p="Segment.cs" t="Include" />
+        <e p="TestPool.cs" t="Include" />
+      </e>
+      <e p="csharp-kcp.sln" t="IncludeFlat" />
+      <e p="dotNetty-kcp" t="IncludeRecursive">
+        <e p="bin" t="ExcludeRecursive" />
+        <e p="ChannelConfig.cs" t="Include" />
+        <e p="ClientChannelHandler.cs" t="Include" />
+        <e p="ClientEndPointChannelManager.cs" t="Include" />
+        <e p="CloseTask.cs" t="Include" />
+        <e p="CodecOutputList.cs" t="Include" />
+        <e p="ConvChannelManager.cs" t="Include" />
+        <e p="Crc32.cs" t="Include" />
+        <e p="Crc32OutPut.cs" t="Include" />
+        <e p="dotNetty-kcp.csproj" t="IncludeRecursive" />
+        <e p="FecOutPut.cs" t="Include" />
+        <e p="IChannelManager.cs" t="Include" />
+        <e p="KcpClient.cs" t="Include" />
+        <e p="KcpListener.cs" t="Include" />
+        <e p="KcpOutPutImp.cs" t="Include" />
+        <e p="KcpServer.cs" t="Include" />
+        <e p="obj" t="ExcludeRecursive">
+          <e p="Debug" t="Include">
+            <e p="netcoreapp2.2" t="Include">
+              <e p="dotNetty-kcp.AssemblyInfo.cs" t="Include" />
+            </e>
+          </e>
+        </e>
+        <e p="queue" t="Include">
+          <e p="ConcurrentCircularArrayQueue.cs" t="Include" />
+          <e p="MpscArrayQueue.cs" t="Include" />
+          <e p="RefArrayAccessUtil.cs" t="Include" />
+        </e>
+        <e p="RecieveTask.cs" t="Include" />
+        <e p="ScheduleTask.cs" t="Include" />
+        <e p="SendTask.cs" t="Include" />
+        <e p="ServerChannelHandler.cs" t="Include" />
+        <e p="ServerEndPointChannelManager.cs" t="Include" />
+        <e p="thread" t="Include">
+          <e p="AbstratcMessageExecutor.cs" t="Include" />
+          <e p="ConcurrentBuffer.cs" t="Include" />
+          <e p="DistuptorMessageExecutor.cs" t="Include" />
+          <e p="ExecutorPool.cs" t="Include" />
+          <e p="IExecutorPool.cs" t="Include" />
+          <e p="IMessageExecutor.cs" t="Include" />
+          <e p="ITask.cs" t="Include" />
+          <e p="MessageExecutorTest.cs" t="Include" />
+          <e p="RingBuffer.cs" t="Include" />
+          <e p="ThreadMessageExecutor.cs" t="Include" />
+        </e>
+        <e p="Ukcp.cs" t="Include" />
+        <e p="User.cs" t="Include" />
+      </e>
+      <e p="example-Kcp" t="IncludeRecursive">
+        <e p="bin" t="ExcludeRecursive" />
+        <e p="example-Kcp.csproj" t="IncludeRecursive" />
+        <e p="KcpRttExampleClient.cs" t="Include" />
+        <e p="KcpRttExampleServer.cs" t="Include" />
+        <e p="obj" t="ExcludeRecursive">
+          <e p="Debug" t="Include">
+            <e p="netcoreapp2.2" t="Include">
+              <e p="example-Kcp.AssemblyInfo.cs" t="Include" />
+            </e>
+          </e>
+        </e>
+        <e p="Program.cs" t="Include" />
+      </e>
+      <e p="kcp4game" t="IncludeRecursive">
+        <e p="bin" t="ExcludeRecursive" />
+        <e p="code" t="Include">
+          <e p="ClientChannelInitializer.cs" t="Include" />
+          <e p="IDistributeManager.cs" t="Include" />
+          <e p="IHandler.cs" t="Include" />
+          <e p="IMessageManager.cs" t="Include" />
+          <e p="IProtoDecodeEncode.cs" t="Include" />
+          <e p="TcpChannelHandler.cs" t="Include" />
+          <e p="TcpProtoDecode.cs" t="Include" />
+          <e p="TcpProtoEncode.cs" t="Include" />
+        </e>
+        <e p="GameChannel.cs" t="Include" />
+        <e p="GameClientService.cs" t="Include" />
+        <e p="GameConfig.cs" t="Include" />
+        <e p="GameService.cs" t="Include" />
+        <e p="GameUntils.cs" t="Include" />
+        <e p="IGameHandler.cs" t="Include" />
+        <e p="kcp4game.csproj" t="IncludeRecursive" />
+        <e p="KcpService.cs" t="Include" />
+        <e p="Message.cs" t="Include" />
+        <e p="obj" t="ExcludeRecursive">
+          <e p="Debug" t="Include">
+            <e p="netcoreapp2.2" t="Include">
+              <e p="kcp4game.AssemblyInfo.cs" t="Include" />
+            </e>
+          </e>
+        </e>
+        <e p="Program.cs" t="Include" />
+        <e p="TcpClient.cs" t="Include" />
+        <e p="TcpServer.cs" t="Include" />
+      </e>
+      <e p="packages" t="ExcludeRecursive" />
+    </e>
+    <e p="$USER_HOME$/Library/Caches/Rider2019.3/extResources" t="IncludeRecursive" />
+    <e p="$USER_HOME$/Library/Caches/Rider2019.3/resharper-host/local/Transient/ReSharperHost/v193/SolutionCaches/_csharp-kcp.-433342480.00" t="ExcludeRecursive" />
+  </component>
+</project>
