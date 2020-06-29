@@ -16,7 +16,7 @@ namespace dotNetty_kcp
             return ukcp;
         }
 
-        public void New(EndPoint endPoint, Ukcp ukcp)
+        public void New(EndPoint endPoint, Ukcp ukcp, DatagramPacket msg)
         {
             _ukcps[endPoint] = ukcp;
         }

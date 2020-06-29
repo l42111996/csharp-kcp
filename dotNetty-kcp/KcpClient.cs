@@ -101,7 +101,7 @@ namespace dotNetty_kcp
             var user = new User(localChannel, remoteAddress, localChannel.LocalAddress);
             ukcp.user(user);
 
-            _channelManager.New(localChannel.LocalAddress, ukcp);
+            _channelManager.New(localChannel.LocalAddress, ukcp,null);
 
             var scheduleTask = new ScheduleTask( _channelManager, ukcp);
             KcpUntils.scheduleHashedWheel(scheduleTask, TimeSpan.FromMilliseconds(ukcp.getInterval()));

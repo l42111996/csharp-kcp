@@ -26,15 +26,26 @@ namespace dotNetty_kcp
 
         public Ukcp get(DatagramPacket msg)
         {
-            var bytebuffer = msg.Content;
-            int conv = bytebuffer.GetIntLE(convIndex);
+            var conv = getConv(msg);
             _ukcps.TryGetValue(conv, out var ukcp);
             return ukcp;
         }
 
-        public void New(EndPoint endPoint, Ukcp ukcp)
+        private int getConv(DatagramPacket msg) {
+            var bytebuffer = msg.Content;
+            return bytebuffer.GetIntLE(convIndex);;
+        }
+        
+        
+        
+        public void New(EndPoint endPoint, Ukcp ukcp,DatagramPacket msg)
         {
-            _ukcps.TryAdd(ukcp.getConv(), ukcp);
+            var conv = ukcp.getConv();
+            if (msg != null) {
+                conv = getConv(msg);
+                ukcp.setConv(conv);
+            }
+            _ukcps.TryAdd(conv, ukcp);
         }
 
         public void del(Ukcp ukcp)

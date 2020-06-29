@@ -26,9 +26,9 @@ namespace example_Kcp
             channelConfig.FecParityShardCount=1;
             channelConfig.AckNoDelay=true;
             channelConfig.Crc32Check = true;
-            channelConfig.KcpTag = true;
+            channelConfig.Conv = 55;
+            // channelConfig.KcpTag = true;
             //channelConfig.setTimeoutMillis(10000);
-            channelConfig.AutoSetConv=true;
 
             KcpClient kcpClient = new KcpClient();
             kcpClient.init(channelConfig);
@@ -36,7 +36,7 @@ namespace example_Kcp
             KcpRttExampleClient kcpClientRttExample = new KcpRttExampleClient();
             //kcpClient.connect(new InetSocketAddress("127.0.0.1",20003),channelConfig,kcpClientRttExample);
 
-            EndPoint remoteAddress = new IPEndPoint(IPAddress.Parse("127.0.0.1"),20003);
+            EndPoint remoteAddress = new IPEndPoint(IPAddress.Parse("127.0.0.1"),20004);
             _ukcp = kcpClient.connect(remoteAddress,channelConfig,kcpClientRttExample);
 
             try

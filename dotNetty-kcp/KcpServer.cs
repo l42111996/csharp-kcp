@@ -37,11 +37,6 @@ namespace dotNetty_kcp
 
 
         public void init(IExecutorPool executorPool, KcpListener kcpListener, ChannelConfig channelConfig, params int[] ports) {
-            //自动获取conv时 conv应该为0
-            if (channelConfig.AutoSetConv) {
-                channelConfig.Conv=0;
-            }
-
             if(channelConfig.UseConvChannel){
                 int convIndex = 0;
                 if(channelConfig.Crc32Check){

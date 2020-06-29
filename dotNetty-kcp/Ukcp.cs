@@ -105,7 +105,6 @@ namespace dotNetty_kcp
             kcp.Mtu = channelConfig.Mtu;
             kcp.Stream = channelConfig.Stream;
             kcp.AckNoDelay = channelConfig.AckNoDelay;
-            kcp.AutoSetConv = channelConfig.AutoSetConv;
             kcp.setAckMaskSize(channelConfig.AckMaskSize);
             fastFlush = channelConfig.FastFlush;
         }
@@ -457,17 +456,6 @@ namespace dotNetty_kcp
         public Ukcp setByteBufAllocator(IByteBufferAllocator allocator)
         {
             kcp.ByteBufAllocator = allocator;
-            return this;
-        }
-
-        public bool isAutoSetConv()
-        {
-            return kcp.AutoSetConv;
-        }
-
-        public Ukcp setAutoSetConv(bool autoSetConv)
-        {
-            kcp.AutoSetConv =autoSetConv ;
             return this;
         }
 

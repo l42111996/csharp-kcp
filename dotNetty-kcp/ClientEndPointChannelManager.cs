@@ -6,7 +6,7 @@ using DotNetty.Transport.Channels.Sockets;
 
 namespace dotNetty_kcp
 {
-    public class ClientEndPointChannelManager :IChannelManager
+    public class ClientEndPointChannelManager : IChannelManager
     {
         private readonly ConcurrentDictionary<EndPoint, Ukcp> _ukcps = new ConcurrentDictionary<EndPoint, Ukcp>();
 
@@ -16,7 +16,7 @@ namespace dotNetty_kcp
             return ukcp;
         }
 
-        public void New(EndPoint endPoint, Ukcp ukcp)
+        public void New(EndPoint endPoint, Ukcp ukcp, DatagramPacket msg)
         {
             _ukcps[endPoint] = ukcp;
         }

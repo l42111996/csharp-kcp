@@ -206,10 +206,6 @@ namespace base_kcp
         private long ackMask;
         private long lastRcvNxt;
 
-/**
-     * automatically set conv
-     */
-        private bool autoSetConv;
 
         private static long long2Uint(long n)
         {
@@ -889,7 +885,7 @@ namespace base_kcp
                 }
 
                 conv = data.ReadIntLE();
-                if (conv != this.conv && !(this.conv == 0 && autoSetConv))
+                if (conv != this.conv)
                 {
                     return -4;
                 }
@@ -934,12 +930,6 @@ namespace base_kcp
                 if (cmd != IKCP_CMD_PUSH && cmd != IKCP_CMD_ACK && cmd != IKCP_CMD_WASK && cmd != IKCP_CMD_WINS)
                 {
                     return -3;
-                }
-
-                if (this.conv == 0 && autoSetConv)
-                {
-                    // automatically set conv
-                    this.conv = conv;
                 }
 
                 //最后收到的来计算远程窗口大小
@@ -1790,12 +1780,6 @@ namespace base_kcp
         {
             get => stream;
             set => stream = value;
-        }
-
-        public bool AutoSetConv
-        {
-            get => autoSetConv;
-            set => autoSetConv = value;
         }
 
         public int RcvWnd

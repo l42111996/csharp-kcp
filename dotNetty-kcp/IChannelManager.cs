@@ -10,7 +10,7 @@ namespace dotNetty_kcp
     {
         Ukcp get(DatagramPacket msg);
 
-        void New(EndPoint endPoint, Ukcp ukcp);
+        void New(EndPoint endPoint, Ukcp ukcp, DatagramPacket msg);
 
         void del(Ukcp ukcp);
 

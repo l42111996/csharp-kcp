@@ -28,7 +28,6 @@ namespace dotNetty_kcp
         //crc32校验
         private bool crc32Check = false;
 
-        private bool autoSetConv = false;
         //增加ack包回复成功率 填 /8/16/32
         private int ackMaskSize = 0;
         /**使用conv确定一个channel 还是使用 socketAddress确定一个channel**/
@@ -164,12 +163,6 @@ namespace dotNetty_kcp
                 }
                 crc32Check = value;
             }
-        }
-
-        public bool AutoSetConv
-        {
-            get => autoSetConv;
-            set => autoSetConv = value;
         }
 
         public int AckMaskSize

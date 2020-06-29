@@ -22,7 +22,6 @@ namespace example_Kcp
             channelConfig.FecParityShardCount=1;
             channelConfig.AckNoDelay=true;
             channelConfig.TimeoutMillis=10000;
-            channelConfig.AutoSetConv=true;
             channelConfig.UseConvChannel = true;
             KcpServer kcpServer = new KcpServer();
             kcpServer.init(Environment.ProcessorCount, kcpRttExampleServer,channelConfig,20003);
