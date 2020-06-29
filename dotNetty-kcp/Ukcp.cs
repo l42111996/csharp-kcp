@@ -135,7 +135,7 @@ namespace dotNetty_kcp
             Snmp.snmp.InBytes += data.ReadableBytes;
             if (_channelConfig.Crc32Check)
             {
-                long checksum = data.ReadUnsignedInt();
+                long checksum = data.ReadUnsignedIntLE();
                 if (checksum != Crc32.ComputeChecksum(data,data.ReaderIndex,data.ReadableBytes))
                 {
                     Snmp.snmp.InCsumErrors++;
