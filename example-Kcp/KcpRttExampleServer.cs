@@ -27,11 +27,11 @@ namespace example_Kcp
             kcpServer.init(Environment.ProcessorCount, kcpRttExampleServer,channelConfig,20003);
         }
 
-        public void handleReceive(IByteBuffer byteBuf, Ukcp ukcp,int protocolType)
+        public void handleReceive(IByteBuffer byteBuf, Ukcp ukcp)
         {
             short curCount = byteBuf.GetShort(byteBuf.ReaderIndex);
             Console.WriteLine(Thread.CurrentThread.Name+" 收到消息 "+curCount);
-            ukcp.writeKcpMessage(byteBuf);
+            ukcp.writeMessage(byteBuf);
             if (curCount == -1) {
                 ukcp.notifyCloseEvent();
             }

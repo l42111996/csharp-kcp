@@ -18,26 +18,25 @@ namespace kcp4game
 
         public void sendMessage(Message<T> message)
         {
-            var protocolType = message.ProtocolType;
             var lenth = _protoDecodeEncode.CalculationLenth(message);
             var bytebuffer = PooledByteBufferAllocator.Default.DirectBuffer(lenth);
             _protoDecodeEncode.encode(bytebuffer,message);
 
-            if (protocolType == Ukcp.TCP_PROTOCOL)
-            {
-                _tcpChannel.WriteAndFlushAsync(bytebuffer);
-            }
+            // if (protocolType == Ukcp.TCP_PROTOCOL)
+            // {
+            //     _tcpChannel.WriteAndFlushAsync(bytebuffer);
+            // }
             //TODO 缓冲区满了？
             try
             {
-                if (protocolType == Ukcp.UDP_PROTOCOL)
-                {
-                    _kcpChannel.writeUdpMessage(bytebuffer);
-                }
-                else if(protocolType== Ukcp.KCP_PROTOCOL)
-                {
-                    _kcpChannel.writeKcpMessage(bytebuffer);
-                }
+                // if (protocolType == Ukcp.UDP_PROTOCOL)
+                // {
+                //     _kcpChannel.writeUdpMessage(bytebuffer);
+                // }
+                // else if(protocolType== Ukcp.KCP_PROTOCOL)
+                // {
+                //     _kcpChannel.writeMessage(bytebuffer);
+                // }
             }
             finally
             {

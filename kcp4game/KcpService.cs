@@ -12,10 +12,9 @@ namespace dotNetty_kcp
         private IMessageManager<T> _messageManager;
 
 
-        public void handleReceive(IByteBuffer byteBuf, Ukcp ukcp,int protocolType)
+        public void handleReceive(IByteBuffer byteBuf, Ukcp ukcp)
         {
             var message = _protoDecodeEncode.decode(byteBuf);
-            message.ProtocolType = protocolType;
             var handler = _messageManager.getHandler(message.MessageId);
             handler.handler(message);
         }

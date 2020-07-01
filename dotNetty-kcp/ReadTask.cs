@@ -5,25 +5,25 @@ using dotNetty_kcp.thread;
 
 namespace dotNetty_kcp
 {
-    public class RecieveTask : ITask
+    public class ReadTask : ITask
     {
         private Ukcp kcp;
 
-        private static readonly ThreadLocalPool<RecieveTask> RECYCLER =
-            new ThreadLocalPool<RecieveTask>(handle => new RecieveTask(handle));
+        private static readonly ThreadLocalPool<ReadTask> RECYCLER =
+            new ThreadLocalPool<ReadTask>(handle => new ReadTask(handle));
 
         private readonly ThreadLocalPool.Handle recyclerHandle;
 
-        private RecieveTask(ThreadLocalPool.Handle recyclerHandle)
+        private ReadTask(ThreadLocalPool.Handle recyclerHandle)
         {
             this.recyclerHandle = recyclerHandle;
         }
 
-        public static RecieveTask New(Ukcp kcp)
+        public static ReadTask New(Ukcp kcp)
         {
-            RecieveTask recieveTask = RECYCLER.Take();
-            recieveTask.kcp = kcp;
-            return recieveTask;
+            ReadTask readTask = RECYCLER.Take();
+            readTask.kcp = kcp;
+            return readTask;
         }
 
         public override void execute()
@@ -37,25 +37,17 @@ namespace dotNetty_kcp
                 }
                 bool hasKcpMessage = false;
                 long current = kcp.currentMs();
-                var recieveList = kcp.RecieveList;
+                var readQueue = kcp.ReadQueue;
                 IByteBuffer byteBuf = null;
                 for (;;)
                 {
-                    if (!recieveList.TryDequeue(out byteBuf))
+                    if (!readQueue.TryDequeue(out byteBuf))
                     {
                         break;
                     }
-                    //区分udp还是kcp消息
-                    if (kcp.ChannelConfig.KcpTag && byteBuf.ReadByte() == Ukcp.UDP_PROTOCOL)
-                    {
-                        readBytebuf(byteBuf, current,Ukcp.UDP_PROTOCOL);
-                    }
-                    else
-                    {
-                        hasKcpMessage = true;
-                        kcp.input(byteBuf, current);
-                        byteBuf.Release();
-                    }
+                    hasKcpMessage = true;
+                    kcp.input(byteBuf, current);
+                    byteBuf.Release();
                 }
                 if (!hasKcpMessage) {
                     return;
@@ -71,16 +63,16 @@ namespace dotNetty_kcp
                     for (int i = 0; i < size; i++)
                     {
                         byteBuf = bufList[i];
-                        readBytebuf(byteBuf,current,Ukcp.KCP_PROTOCOL);
+                        readBytebuf(byteBuf,current);
                     }
                 } else {
                     while (kcp.canRecv()) {
                         IByteBuffer recvBuf = kcp.mergeReceive();
-                        readBytebuf(recvBuf,current,Ukcp.KCP_PROTOCOL);
+                        readBytebuf(recvBuf,current);
                     }
                 }
                 //判断写事件
-                if (!kcp.SendList.IsEmpty&&kcp.canSend(false)) {
+                if (!kcp.WriteQueue.IsEmpty&&kcp.canSend(false)) {
                     kcp.notifyWriteEvent();
                 }
             } catch (Exception e) {
@@ -93,12 +85,12 @@ namespace dotNetty_kcp
         }
 
 
-        private void readBytebuf(IByteBuffer buf,long current,int protocolType)
+        private void readBytebuf(IByteBuffer buf,long current)
         {
             kcp.LastRecieveTime = current;
             try
             {
-                kcp.getKcpListener().handleReceive(buf, kcp, protocolType);
+                kcp.getKcpListener().handleReceive(buf, kcp);
             }
             catch (Exception throwable)
             {
@@ -112,6 +104,7 @@ namespace dotNetty_kcp
 
         private void release()
         {
+            kcp.ReadProcessing.Set(false);
             kcp = null;
             recyclerHandle.Release(this);
         }

@@ -16,7 +16,7 @@ namespace doNetty_tcp.code
         protected override void ChannelRead0(IChannelHandlerContext ctx, Message<T> msg)
         {
             var handler =  _messageManager.getHandler(msg.MessageId);
-            msg.ProtocolType = Ukcp.TCP_PROTOCOL;
+            // msg.ProtocolType = Ukcp.TCP_PROTOCOL;
             handler.handler(msg);
         }
     }

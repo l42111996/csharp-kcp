@@ -6,23 +6,23 @@ using dotNetty_kcp.thread;
 
 namespace dotNetty_kcp
 {
-    public class SendTask : ITask
+    public class WriteTask : ITask
     {
         private Ukcp kcp;
 
-        private static readonly ThreadLocalPool<SendTask> RECYCLER =
-            new ThreadLocalPool<SendTask>(handle => new SendTask(handle));
+        private static readonly ThreadLocalPool<WriteTask> RECYCLER =
+            new ThreadLocalPool<WriteTask>(handle => new WriteTask(handle));
 
         private readonly ThreadLocalPool.Handle recyclerHandle;
 
-        private SendTask(ThreadLocalPool.Handle recyclerHandle)
+        private WriteTask(ThreadLocalPool.Handle recyclerHandle)
         {
             this.recyclerHandle = recyclerHandle;
         }
 
-        public static SendTask New(Ukcp kcp)
+        public static WriteTask New(Ukcp kcp)
         {
-            SendTask recieveTask = RECYCLER.Take();
+            WriteTask recieveTask = RECYCLER.Take();
             recieveTask.kcp = kcp;
             return recieveTask;
         }
@@ -39,11 +39,11 @@ namespace dotNetty_kcp
                 }
 
                 //从发送缓冲区到kcp缓冲区
-                var queue = kcp.SendList;
+                var writeQueue = kcp.WriteQueue;
                 IByteBuffer byteBuf = null;
                 while (kcp.canSend(false))
                 {
-                    if (!queue.TryDequeue(out byteBuf))
+                    if (!writeQueue.TryDequeue(out byteBuf))
                     {
                         break;
                     }
@@ -83,6 +83,7 @@ namespace dotNetty_kcp
 
         private void release()
         {
+            kcp.WriteProcessing.Set(false);
             kcp = null;
             recyclerHandle.Release(this);
         }

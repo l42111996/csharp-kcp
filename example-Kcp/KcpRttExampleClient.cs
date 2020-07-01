@@ -27,7 +27,6 @@ namespace example_Kcp
             channelConfig.AckNoDelay=true;
             channelConfig.Crc32Check = true;
             channelConfig.Conv = 55;
-            // channelConfig.KcpTag = true;
             //channelConfig.setTimeoutMillis(10000);
 
             KcpClient kcpClient = new KcpClient();
@@ -36,7 +35,7 @@ namespace example_Kcp
             KcpRttExampleClient kcpClientRttExample = new KcpRttExampleClient();
             //kcpClient.connect(new InetSocketAddress("127.0.0.1",20003),channelConfig,kcpClientRttExample);
 
-            EndPoint remoteAddress = new IPEndPoint(IPAddress.Parse("127.0.0.1"),20004);
+            EndPoint remoteAddress = new IPEndPoint(IPAddress.Parse("127.0.0.1"),20003);
             _ukcp = kcpClient.connect(remoteAddress,channelConfig,kcpClientRttExample);
 
             try
@@ -108,13 +107,13 @@ namespace example_Kcp
         private void sendFunc(object source, ElapsedEventArgs e)
         {
             var byteBuf = rttMsg(++count);
-            _ukcp.writeKcpMessage(byteBuf);
+            _ukcp.writeMessage(byteBuf);
             byteBuf.Release();
             if (count >= rtts.Length) {
                 // finish
                 timer20.Elapsed -= sendhandler;
                 byteBuf = rttMsg(-1);
-                _ukcp.writeKcpMessage(byteBuf);
+                _ukcp.writeMessage(byteBuf);
                 byteBuf.Release();
             }
         }
@@ -141,7 +140,7 @@ namespace example_Kcp
             return buf;
         }
 
-        public void handleReceive(IByteBuffer byteBuf, Ukcp ukcp,int protocolType)
+        public void handleReceive(IByteBuffer byteBuf, Ukcp ukcp)
         {
             int curCount = byteBuf.ReadShort();
             if (curCount == -1)

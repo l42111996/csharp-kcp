@@ -15,8 +15,6 @@ namespace dotNetty_kcp
     {
         public const int HEADER_CRC = 4, KCP_TAG=1, HEADER_NONCESIZE = 16;
 
-        public const int UDP_PROTOCOL = 1, KCP_PROTOCOL = 0, TCP_PROTOCOL = 2;
-
         private readonly Kcp kcp;
 
         private bool fastFlush = true;
@@ -28,16 +26,19 @@ namespace dotNetty_kcp
         private readonly FecEncode _fecEncode;
         private readonly FecDecode _fecDecode;
 
-        private readonly MpscArrayQueue<IByteBuffer> _sendList;
+        private readonly MpscArrayQueue<IByteBuffer> _writeQueue;
 
-        private readonly MpscArrayQueue<IByteBuffer> _recieveList;
+        private readonly MpscArrayQueue<IByteBuffer> _readQueue;
 
         private readonly IMessageExecutor _iMessageExecutor;
 
         private readonly KcpListener _kcpListener;
 
         private readonly ChannelConfig _channelConfig;
-
+        
+        private AtomicBoolean _readProcessing = new AtomicBoolean();
+        
+        private AtomicBoolean _writeProcessing = new AtomicBoolean();
 
 
         /**
@@ -62,8 +63,8 @@ namespace dotNetty_kcp
             this._kcpListener = kcpListener;
             this._iMessageExecutor = iMessageExecutor;
             //默认2<<11   可以修改
-            _sendList = new MpscArrayQueue<IByteBuffer>(2<<10);
-            _recieveList = new MpscArrayQueue<IByteBuffer>(2<<10);
+            _writeQueue = new MpscArrayQueue<IByteBuffer>(2<<10);
+            _readQueue = new MpscArrayQueue<IByteBuffer>(2<<10);
             //recieveList = new SpscLinkedQueue<>();
             int headerSize = 0;
 
@@ -484,7 +485,7 @@ namespace dotNetty_kcp
 
         internal void read(IByteBuffer iByteBuffer)
         {
-            if (_recieveList.TryEnqueue(iByteBuffer))
+            if (_readQueue.TryEnqueue(iByteBuffer))
             {
                 notifyReadEvent();
             }
@@ -501,11 +502,11 @@ namespace dotNetty_kcp
          * @param IByteBuffer 发送后需要手动释放
          * @return
          */
-        public bool writeKcpMessage(IByteBuffer byteBuffer)
+        public bool writeMessage(IByteBuffer byteBuffer)
         {
             byteBuffer = byteBuffer.RetainedDuplicate();
 
-            if (!_sendList.TryEnqueue(byteBuffer))
+            if (!_writeQueue.TryEnqueue(byteBuffer))
             {
                 Console.WriteLine("conv "+kcp.Conv+" sendList is full");
                 byteBuffer.Release();
@@ -516,20 +517,6 @@ namespace dotNetty_kcp
         }
 
 
-        /**
-         * 发送udp消息
-         */
-        public void writeUdpMessage(IByteBuffer byteBuffer)
-        {
-            byteBuffer = byteBuffer.RetainedDuplicate();
-            //写入头信息
-            var head = PooledByteBufferAllocator.Default.DirectBuffer(1);
-            head.WriteByte(UDP_PROTOCOL);
-            var content = Unpooled.WrappedBuffer(head, byteBuffer);
-            var user   = kcp.User as User;
-            var temp = new DatagramPacket(content,user.LocalAddress, user.RemoteAddress);
-            user.Channel.WriteAndFlushAsync(temp);
-        }
 
         public IMessageExecutor getDisruptorSingleExecutor()
         {
@@ -546,14 +533,20 @@ namespace dotNetty_kcp
 
         private void notifyReadEvent()
         {
-            var recieveTask = RecieveTask.New(this);
-            this._iMessageExecutor.execute(recieveTask);
+            if (_readProcessing.CompareAndSet(false, true))
+            {
+                var readTask = ReadTask.New(this);
+                _iMessageExecutor.execute(readTask);
+            }
         }
 
         protected internal void notifyWriteEvent()
         {
-            SendTask sendTask = SendTask.New(this);
-            this._iMessageExecutor.execute(sendTask);
+            if (_writeProcessing.CompareAndSet(false, true))
+            {
+                var writeTask = WriteTask.New(this);
+                _iMessageExecutor.execute(writeTask);
+            }
         }
 
 
@@ -595,12 +588,12 @@ namespace dotNetty_kcp
             kcp.release();
 
             IByteBuffer buffer  = null;
-            while (_sendList.TryDequeue(out buffer))
+            while (_writeQueue.TryDequeue(out buffer))
             {
                 buffer.Release();
             }
 
-            while (_recieveList.TryDequeue(out buffer))
+            while (_readQueue.TryDequeue(out buffer))
             {
                 buffer.Release();
             }
@@ -622,9 +615,9 @@ namespace dotNetty_kcp
             return this;
         }
 
-        public MpscArrayQueue<IByteBuffer> SendList => _sendList;
+        public MpscArrayQueue<IByteBuffer> WriteQueue => _writeQueue;
 
-        public MpscArrayQueue<IByteBuffer> RecieveList => _recieveList;
+        public MpscArrayQueue<IByteBuffer> ReadQueue => _readQueue;
 
         public ChannelConfig ChannelConfig => _channelConfig;
 
@@ -632,6 +625,10 @@ namespace dotNetty_kcp
         {
             return kcp.currentMs();
         }
+
+        public AtomicBoolean ReadProcessing => _readProcessing;
+
+        public AtomicBoolean WriteProcessing => _writeProcessing;
 
         protected internal KcpListener KcpListener => _kcpListener;
 

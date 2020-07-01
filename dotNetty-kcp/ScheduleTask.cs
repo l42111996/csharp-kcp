@@ -52,7 +52,7 @@ namespace dotNetty_kcp
                 KcpUntils.scheduleHashedWheel(this, TimeSpan.FromMilliseconds(next));
 
                 //检测写缓冲区 如果能写则触发写事件
-                if(!_ukcp.SendList.IsEmpty&&_ukcp.canSend(false)
+                if(!_ukcp.WriteQueue.IsEmpty&&_ukcp.canSend(false)
                 ){
                     _ukcp.notifyWriteEvent();
                 }

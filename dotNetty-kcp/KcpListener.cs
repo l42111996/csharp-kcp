@@ -12,7 +12,7 @@ namespace dotNetty_kcp
          * @param byteBuf the data
          * @param ukcp
          */
-        void handleReceive(IByteBuffer byteBuf, Ukcp ukcp,int protocolType);
+        void handleReceive(IByteBuffer byteBuf, Ukcp ukcp);
 
         /**
          *
