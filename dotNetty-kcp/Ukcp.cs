@@ -6,6 +6,7 @@ using base_kcp;
 using DotNetty.Buffers;
 using DotNetty.Transport.Channels.Sockets;
 using dotNetty_kcp.thread;
+using DotNetty.Common.Internal;
 using fec;
 using fec.fec;
 
@@ -13,7 +14,7 @@ namespace dotNetty_kcp
 {
     public class Ukcp
     {
-        public const int HEADER_CRC = 4, KCP_TAG=1, HEADER_NONCESIZE = 16;
+        public const int HEADER_CRC = 4,  HEADER_NONCESIZE = 16;
 
         private readonly Kcp kcp;
 
@@ -26,7 +27,7 @@ namespace dotNetty_kcp
         private readonly FecEncode _fecEncode;
         private readonly FecDecode _fecDecode;
 
-        private readonly MpscArrayQueue<IByteBuffer> _writeQueue;
+        private readonly ConcurrentQueue<IByteBuffer> _writeQueue;
 
         private readonly MpscArrayQueue<IByteBuffer> _readQueue;
 
@@ -63,15 +64,12 @@ namespace dotNetty_kcp
             this._kcpListener = kcpListener;
             this._iMessageExecutor = iMessageExecutor;
             //默认2<<11   可以修改
-            _writeQueue = new MpscArrayQueue<IByteBuffer>(2<<10);
+            _writeQueue = new ConcurrentQueue<IByteBuffer>();
+                // <IByteBuffer>(2<<10);
             _readQueue = new MpscArrayQueue<IByteBuffer>(2<<10);
             //recieveList = new SpscLinkedQueue<>();
             int headerSize = 0;
 
-            if (channelConfig.KcpTag)
-            {
-                headerSize += KCP_TAG;
-            }
 
             //init crc32
             if(channelConfig.Crc32Check){
@@ -506,12 +504,13 @@ namespace dotNetty_kcp
         {
             byteBuffer = byteBuffer.RetainedDuplicate();
 
-            if (!_writeQueue.TryEnqueue(byteBuffer))
-            {
-                Console.WriteLine("conv "+kcp.Conv+" sendList is full");
-                byteBuffer.Release();
-                return false;
-            }
+            _writeQueue.Enqueue(byteBuffer);
+            // if (!_writeQueue.TryEnqueue(byteBuffer))
+            // {
+            //     Console.WriteLine("conv "+kcp.Conv+" sendList is full");
+            //     byteBuffer.Release();
+            //     return false;
+            // }
             notifyWriteEvent();
             return true;
         }
@@ -615,7 +614,7 @@ namespace dotNetty_kcp
             return this;
         }
 
-        public MpscArrayQueue<IByteBuffer> WriteQueue => _writeQueue;
+        public ConcurrentQueue<IByteBuffer> WriteQueue => _writeQueue;
 
         public MpscArrayQueue<IByteBuffer> ReadQueue => _readQueue;
 

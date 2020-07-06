@@ -44,10 +44,6 @@ namespace dotNetty_kcp
         {
             if(channelConfig.UseConvChannel){
                 var convIndex = 0;
-                if (channelConfig.KcpTag)
-                {
-                    convIndex += Ukcp.KCP_TAG;
-                }
                 if(channelConfig.Crc32Check){
                     convIndex+=Ukcp.HEADER_CRC;
                 }
