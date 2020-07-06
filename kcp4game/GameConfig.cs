@@ -13,7 +13,6 @@ namespace kcp4game
 
         public GameConfig()
         {
-            KcpTag = true;
         }
 
 

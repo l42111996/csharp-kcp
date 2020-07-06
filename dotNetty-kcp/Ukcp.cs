@@ -46,7 +46,7 @@ namespace dotNetty_kcp
          * 上次收到完整消息包时间
          * 用于心跳检测
          **/
-        public long LastRecieveTime { get; set; } = KcpUntils.currentMs();
+        internal long LastRecieveTime { get; set; } = KcpUntils.currentMs();
 
 
 
@@ -126,7 +126,7 @@ namespace dotNetty_kcp
         }
 
 
-        public void input(IByteBuffer data, long current)
+        internal void input(IByteBuffer data, long current)
         {
 //            _lastRecieveTime = KcpUntils.currentMs();
             Snmp.snmp.InPkts++;
@@ -194,7 +194,7 @@ namespace dotNetty_kcp
          * @param buf
          * @throws IOException
          */
-        public void send(IByteBuffer buf)
+        internal void send(IByteBuffer buf)
         {
             int ret = kcp.send(buf);
             switch (ret)
@@ -211,7 +211,7 @@ namespace dotNetty_kcp
          *
          * @return The size of the first msg of the kcp, or -1 if none of msg
          */
-        public int peekSize()
+        internal int peekSize()
         {
             return kcp.peekSize();
         }
@@ -255,7 +255,7 @@ namespace dotNetty_kcp
          * @param current current time in milliseconds
          * @return the next time to update
          */
-        public long update(long current)
+        internal long update(long current)
         {
             kcp.update(current);
             long nextTsUp = check(current);
@@ -517,7 +517,7 @@ namespace dotNetty_kcp
 
 
 
-        public IMessageExecutor getDisruptorSingleExecutor()
+        internal IMessageExecutor getDisruptorSingleExecutor()
         {
             return _iMessageExecutor;
         }
@@ -581,7 +581,7 @@ namespace dotNetty_kcp
             active = false;
         }
 
-        public void release()
+        internal void release()
         {
             kcp.State = -1;
             kcp.release();
@@ -614,20 +614,20 @@ namespace dotNetty_kcp
             return this;
         }
 
-        public ConcurrentQueue<IByteBuffer> WriteQueue => _writeQueue;
+        internal ConcurrentQueue<IByteBuffer> WriteQueue => _writeQueue;
 
-        public MpscArrayQueue<IByteBuffer> ReadQueue => _readQueue;
+        internal MpscArrayQueue<IByteBuffer> ReadQueue => _readQueue;
 
         public ChannelConfig ChannelConfig => _channelConfig;
 
-        public long currentMs()
+        internal long currentMs()
         {
             return kcp.currentMs();
         }
 
-        public AtomicBoolean ReadProcessing => _readProcessing;
+        internal AtomicBoolean ReadProcessing => _readProcessing;
 
-        public AtomicBoolean WriteProcessing => _writeProcessing;
+        internal AtomicBoolean WriteProcessing => _writeProcessing;
 
         protected internal KcpListener KcpListener => _kcpListener;
 
