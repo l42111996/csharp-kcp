@@ -519,12 +519,6 @@ namespace dotNetty_kcp
         }
 
 
-
-        internal IMessageExecutor getDisruptorSingleExecutor()
-        {
-            return _iMessageExecutor;
-        }
-
         /**
          * 主动关闭连接调用
          */
@@ -629,12 +623,13 @@ namespace dotNetty_kcp
             return _kcp.currentMs();
         }
 
+        
         internal AtomicBoolean ReadProcessing => _readProcessing;
 
         internal AtomicBoolean WriteProcessing => _writeProcessing;
 
         protected internal KcpListener KcpListener => _kcpListener;
 
-        protected internal IMessageExecutor IMessageExecutor => _iMessageExecutor;
+        internal IMessageExecutor IMessageExecutor => _iMessageExecutor;
     }
 }

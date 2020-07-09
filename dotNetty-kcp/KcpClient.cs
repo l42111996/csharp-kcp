@@ -18,7 +18,6 @@ namespace dotNetty_kcp
      * 2,kcp通过conv标识与服务器通讯
      * 3,客户端发现网络断开重连之后必须通过kcp发送一个心跳包出去 用于服务器确定客户端的出口地址
      * 4,客户端需要最少每60秒发送一个心跳数据包服务端收到后回复客户端用于 路由表记录映射信息
-     *  TODO 需要测试一下移动环境ip切换了  是否需要重新绑定本地ip  朋友说是不用的  还是需要测一下
      */
     public class KcpClient
     {
@@ -31,7 +30,7 @@ namespace dotNetty_kcp
         private IEventLoopGroup _eventLoopGroup;
 
 
-        public IChannel bindLocal(EndPoint localAddress = null)
+        private static IChannel bindLocal(Bootstrap bootstrap,EndPoint localAddress = null)
         {
             if (localAddress == null)
             {
@@ -78,6 +77,40 @@ namespace dotNetty_kcp
             executorPool.CreateMessageExecutor();
             init(channelConfig,executorPool,new MultithreadEventLoopGroup());
         }
+        
+        
+        /**
+         * 重连接口
+         * 使用旧的kcp对象，出口ip和端口替换为新的
+         * 在4G切换为wifi等场景使用
+         * @param ukcp
+         */
+        public void reconnect(Ukcp ukcp){
+            if (!(_channelManager is ConvChannelManager))
+            {
+                throw new Exception("reconnect can only be used in convChannel");
+            }
+            ukcp.IMessageExecutor.execute(new ReconnectTask(ukcp,bootstrap));
+        }
+
+        private class ReconnectTask : ITask
+        {
+            private readonly Ukcp _ukcp;
+            private readonly Bootstrap _bootstrap;
+
+            public ReconnectTask(Ukcp ukcp, Bootstrap bootstrap)
+            {
+                _ukcp = ukcp;
+                _bootstrap = bootstrap;
+            }
+
+            public override void execute()
+            {
+                _ukcp.user().Channel.CloseAsync();
+                var iChannel = bindLocal(_bootstrap);
+                _ukcp.user().Channel = iChannel;
+            }
+        }
 
 
         public Ukcp connect(IChannel localChannel,EndPoint remoteAddress, ChannelConfig channelConfig, KcpListener kcpListener)
@@ -109,7 +142,7 @@ namespace dotNetty_kcp
          */
         public Ukcp connect(EndPoint localAddress,EndPoint remoteAddress, ChannelConfig channelConfig, KcpListener kcpListener)
         {
-            var channel = bindLocal(localAddress);
+            var channel = bindLocal(bootstrap,localAddress);
             return connect(channel, remoteAddress, channelConfig, kcpListener);
         }
 
@@ -118,7 +151,7 @@ namespace dotNetty_kcp
          */
         public Ukcp connect(EndPoint remoteAddress, ChannelConfig channelConfig, KcpListener kcpListener)
         {
-            var channel = bindLocal();
+            var channel = bindLocal(bootstrap);
             return connect(channel, remoteAddress, channelConfig, kcpListener);
         }
 
