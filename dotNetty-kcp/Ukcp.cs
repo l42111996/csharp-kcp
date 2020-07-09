@@ -16,13 +16,13 @@ namespace dotNetty_kcp
     {
         public const int HEADER_CRC = 4,  HEADER_NONCESIZE = 16;
 
-        private readonly Kcp kcp;
+        private readonly Kcp _kcp;
 
         private bool fastFlush = true;
 
         private long tsUpdate = -1;
 
-        private bool active;
+        private bool _active;
 
         private readonly FecEncode _fecEncode;
         private readonly FecDecode _fecDecode;
@@ -35,11 +35,13 @@ namespace dotNetty_kcp
 
         private readonly KcpListener _kcpListener;
 
-        private readonly ChannelConfig _channelConfig;
+        private readonly long _timeoutMillis;
         
-        private AtomicBoolean _readProcessing = new AtomicBoolean();
+        private readonly AtomicBoolean _readProcessing = new AtomicBoolean();
         
-        private AtomicBoolean _writeProcessing = new AtomicBoolean();
+        private readonly AtomicBoolean _writeProcessing = new AtomicBoolean();
+
+        private readonly bool _crc32Check;
 
 
         /**
@@ -58,9 +60,10 @@ namespace dotNetty_kcp
         public Ukcp(KcpOutput output, KcpListener kcpListener, IMessageExecutor iMessageExecutor,
             ReedSolomon reedSolomon, ChannelConfig channelConfig)
         {
-            this._channelConfig = channelConfig;
-            this.kcp = new Kcp(channelConfig.Conv, output);
-            this.active = true;
+            this._timeoutMillis = channelConfig.TimeoutMillis;
+            this._crc32Check = channelConfig.Crc32Check;
+            this._kcp = new Kcp(channelConfig.Conv, output);
+            this._active = true;
             this._kcpListener = kcpListener;
             this._iMessageExecutor = iMessageExecutor;
             //默认2<<11   可以修改
@@ -73,38 +76,38 @@ namespace dotNetty_kcp
 
             //init crc32
             if(channelConfig.Crc32Check){
-                var kcpOutput = kcp.Output;
+                var kcpOutput = _kcp.Output;
                 kcpOutput = new Crc32OutPut(kcpOutput,headerSize);
-                kcp.Output=kcpOutput;
+                _kcp.Output=kcpOutput;
                 headerSize+=HEADER_CRC;
             }
 
             //init fec
             if (reedSolomon != null)
             {
-                var kcpOutput = kcp.Output;
+                var kcpOutput = _kcp.Output;
                 _fecEncode = new FecEncode(headerSize, reedSolomon, channelConfig.Mtu);
                 _fecDecode = new FecDecode(3 * reedSolomon.getTotalShardCount(), reedSolomon, channelConfig.Mtu);
                 kcpOutput = new FecOutPut(kcpOutput, _fecEncode);
-                kcp.Output = kcpOutput;
+                _kcp.Output = kcpOutput;
                 headerSize += Fec.fecHeaderSizePlus2;
             }
 
-            kcp.setReserved(headerSize);
-            intKcpConfig(channelConfig);
+            _kcp.setReserved(headerSize);
+            initKcpConfig(channelConfig);
         }
 
 
-        private void intKcpConfig(ChannelConfig channelConfig)
+        private void initKcpConfig(ChannelConfig channelConfig)
         {
-            kcp.initNodelay(channelConfig.Nodelay, channelConfig.Interval, channelConfig.Fastresend,
+            _kcp.initNodelay(channelConfig.Nodelay, channelConfig.Interval, channelConfig.Fastresend,
                 channelConfig.Nocwnd);
-            kcp.SndWnd = channelConfig.Sndwnd;
-            kcp.RcvWnd = channelConfig.Rcvwnd;
-            kcp.Mtu = channelConfig.Mtu;
-            kcp.Stream = channelConfig.Stream;
-            kcp.AckNoDelay = channelConfig.AckNoDelay;
-            kcp.setAckMaskSize(channelConfig.AckMaskSize);
+            _kcp.SndWnd = channelConfig.Sndwnd;
+            _kcp.RcvWnd = channelConfig.Rcvwnd;
+            _kcp.Mtu = channelConfig.Mtu;
+            _kcp.Stream = channelConfig.Stream;
+            _kcp.AckNoDelay = channelConfig.AckNoDelay;
+            _kcp.setAckMaskSize(channelConfig.AckMaskSize);
             fastFlush = channelConfig.FastFlush;
         }
 
@@ -116,13 +119,13 @@ namespace dotNetty_kcp
          */
         protected internal void receive(List<IByteBuffer> bufList)
         {
-            kcp.recv(bufList);
+            _kcp.recv(bufList);
         }
 
 
         protected internal IByteBuffer mergeReceive()
         {
-            return kcp.mergeRecv();
+            return _kcp.mergeRecv();
         }
 
 
@@ -131,7 +134,7 @@ namespace dotNetty_kcp
 //            _lastRecieveTime = KcpUntils.currentMs();
             Snmp.snmp.InPkts++;
             Snmp.snmp.InBytes += data.ReadableBytes;
-            if (_channelConfig.Crc32Check)
+            if (_crc32Check)
             {
                 long checksum = data.ReadUnsignedIntLE();
                 if (checksum != Crc32.ComputeChecksum(data,data.ReaderIndex,data.ReadableBytes))
@@ -171,7 +174,7 @@ namespace dotNetty_kcp
 
         private void input(IByteBuffer data, bool regular, long current)
         {
-            int ret = kcp.input(data, regular, current);
+            int ret = _kcp.input(data, regular, current);
             switch (ret)
             {
                 case -1:
@@ -196,7 +199,7 @@ namespace dotNetty_kcp
          */
         internal void send(IByteBuffer buf)
         {
-            int ret = kcp.send(buf);
+            int ret = _kcp.send(buf);
             switch (ret)
             {
                 case -2:
@@ -213,7 +216,7 @@ namespace dotNetty_kcp
          */
         internal int peekSize()
         {
-            return kcp.peekSize();
+            return _kcp.peekSize();
         }
 
         /**
@@ -223,7 +226,7 @@ namespace dotNetty_kcp
          */
         protected internal bool canRecv()
         {
-            return kcp.canRecv();
+            return _kcp.canRecv();
         }
 
 
@@ -235,9 +238,9 @@ namespace dotNetty_kcp
          */
         protected internal bool canSend(bool curCanSend)
         {
-            int max = kcp.SndWnd * 2;
+            int max = _kcp.SndWnd * 2;
 
-            int waitSnd = kcp.waitSnd();
+            int waitSnd = _kcp.waitSnd();
             if (curCanSend)
             {
                 return waitSnd < max;
@@ -257,7 +260,7 @@ namespace dotNetty_kcp
          */
         internal long update(long current)
         {
-            kcp.update(current);
+            _kcp.update(current);
             long nextTsUp = check(current);
 
             setTsUpdate(nextTsUp);
@@ -266,7 +269,7 @@ namespace dotNetty_kcp
 
         protected internal long flush(long current)
         {
-            return kcp.flush(false, current);
+            return _kcp.flush(false, current);
         }
 
         /**
@@ -278,7 +281,7 @@ namespace dotNetty_kcp
          */
         protected internal long check(long current)
         {
-            return kcp.check(current);
+            return _kcp.check(current);
         }
 
         /**
@@ -288,7 +291,7 @@ namespace dotNetty_kcp
          */
         protected internal bool checkFlush()
         {
-            return kcp.checkFlush();
+            return _kcp.checkFlush();
         }
 
         /**
@@ -302,7 +305,7 @@ namespace dotNetty_kcp
          */
         protected internal void nodelay(bool nodelay, int interval, int resend, bool nc)
         {
-            kcp.initNodelay(nodelay, interval, resend, nc);
+            _kcp.initNodelay(nodelay, interval, resend, nc);
         }
 
         /**
@@ -312,7 +315,7 @@ namespace dotNetty_kcp
          */
         public int getConv()
         {
-            return kcp.Conv;
+            return _kcp.Conv;
         }
 
         /**
@@ -322,7 +325,7 @@ namespace dotNetty_kcp
          */
         public void setConv(int conv)
         {
-            kcp.Conv = conv;
+            _kcp.Conv = conv;
         }
 
         /**
@@ -332,7 +335,7 @@ namespace dotNetty_kcp
          */
         public bool isNodelay()
         {
-            return kcp.Nodelay;
+            return _kcp.Nodelay;
         }
 
         /**
@@ -343,7 +346,7 @@ namespace dotNetty_kcp
          */
         public Ukcp setNodelay(bool nodelay)
         {
-            kcp.Nodelay = nodelay;
+            _kcp.Nodelay = nodelay;
             return this;
         }
 
@@ -354,7 +357,7 @@ namespace dotNetty_kcp
          */
         public int getInterval()
         {
-            return kcp.Interval;
+            return _kcp.Interval;
         }
 
         /**
@@ -365,7 +368,7 @@ namespace dotNetty_kcp
          */
         public Ukcp setInterval(int interval)
         {
-            kcp.setInterval(interval);
+            _kcp.setInterval(interval);
             return this;
         }
 
@@ -376,7 +379,7 @@ namespace dotNetty_kcp
          */
         public int getFastResend()
         {
-            return kcp.Fastresend;
+            return _kcp.Fastresend;
         }
 
         /**
@@ -387,62 +390,62 @@ namespace dotNetty_kcp
          */
         public Ukcp setFastResend(int fastResend)
         {
-            kcp.Fastresend=fastResend;
+            _kcp.Fastresend=fastResend;
             return this;
         }
 
         public bool isNocwnd()
         {
-            return kcp.Nocwnd;
+            return _kcp.Nocwnd;
         }
 
         public Ukcp setNocwnd(bool nocwnd)
         {
-            kcp.Nocwnd = nocwnd;
+            _kcp.Nocwnd = nocwnd;
             return this;
         }
 
         public int getMinRto()
         {
-            return kcp.RxMinrto;
+            return _kcp.RxMinrto;
         }
 
         public Ukcp setMinRto(int minRto)
         {
-            kcp.RxMinrto = minRto;
+            _kcp.RxMinrto = minRto;
             return this;
         }
 
         public int getMtu()
         {
-            return kcp.Mtu;
+            return _kcp.Mtu;
         }
 
         public Ukcp setMtu(int mtu)
         {
-            kcp.setMtu(mtu);
+            _kcp.setMtu(mtu);
             return this;
         }
 
         public bool isStream()
         {
-            return kcp.Stream;
+            return _kcp.Stream;
         }
 
         public Ukcp setStream(bool stream)
         {
-            kcp.Stream=stream;
+            _kcp.Stream=stream;
             return this;
         }
 
         public int getDeadLink()
         {
-            return kcp.DeadLink;
+            return _kcp.DeadLink;
         }
 
         public Ukcp setDeadLink(int deadLink)
         {
-            kcp.DeadLink = deadLink;
+            _kcp.DeadLink = deadLink;
             return this;
         }
 
@@ -454,18 +457,18 @@ namespace dotNetty_kcp
          */
         public Ukcp setByteBufAllocator(IByteBufferAllocator allocator)
         {
-            kcp.ByteBufAllocator = allocator;
+            _kcp.ByteBufAllocator = allocator;
             return this;
         }
 
         public int waitSnd()
         {
-            return kcp.waitSnd();
+            return _kcp.waitSnd();
         }
 
         public int getRcvWnd()
         {
-            return kcp.RcvWnd;
+            return _kcp.RcvWnd;
         }
 
 
@@ -490,7 +493,7 @@ namespace dotNetty_kcp
             else
             {
                 iByteBuffer.Release();
-                Console.WriteLine("conv "+kcp.Conv+" recieveList is full");
+                Console.WriteLine("conv "+_kcp.Conv+" recieveList is full");
             }
         }
 
@@ -571,20 +574,20 @@ namespace dotNetty_kcp
 
         public bool isActive()
         {
-            return active;
+            return _active;
         }
 
 
         protected internal void close()
         {
             _kcpListener.handleClose(this);
-            active = false;
+            _active = false;
         }
 
         internal void release()
         {
-            kcp.State = -1;
-            kcp.release();
+            _kcp.State = -1;
+            _kcp.release();
 
             IByteBuffer buffer  = null;
             while (_writeQueue.TryDequeue(out buffer))
@@ -605,12 +608,12 @@ namespace dotNetty_kcp
 
         public User user()
         {
-            return (User) kcp.User;
+            return (User) _kcp.User;
         }
 
         public Ukcp user(User user)
         {
-            kcp.User = user;
+            _kcp.User = user;
             return this;
         }
 
@@ -618,11 +621,12 @@ namespace dotNetty_kcp
 
         internal MpscArrayQueue<IByteBuffer> ReadQueue => _readQueue;
 
-        public ChannelConfig ChannelConfig => _channelConfig;
+        public long TimeoutMillis => _timeoutMillis;
+
 
         internal long currentMs()
         {
-            return kcp.currentMs();
+            return _kcp.currentMs();
         }
 
         internal AtomicBoolean ReadProcessing => _readProcessing;

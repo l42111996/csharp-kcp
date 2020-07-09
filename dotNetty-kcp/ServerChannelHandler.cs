@@ -3,7 +3,9 @@ using base_kcp;
 using DotNetty.Transport.Channels;
 using DotNetty.Transport.Channels.Sockets;
 using dotNetty_kcp.thread;
+using DotNetty.Buffers;
 using fec;
+using fec.fec;
 
 namespace dotNetty_kcp
 {
@@ -47,6 +49,15 @@ namespace dotNetty_kcp
                 ukcp.read(content);
                 return;
             }
+            
+            
+            //如果是新连接第一个包的sn必须为0
+            var sn = getSn(content,_channelConfig);
+            if(sn!=0)
+            {
+                msg.Release();
+                return;
+            }
 
             var messageExecutor = _executorPool.GetAutoMessageExecutor();
             KcpOutput kcpOutput = new KcpOutPutImp();
@@ -66,6 +77,20 @@ namespace dotNetty_kcp
 
             var scheduleTask = new ScheduleTask(_channelManager,ukcp);
             KcpUntils.scheduleHashedWheel(scheduleTask, TimeSpan.FromMilliseconds(ukcp.getInterval()));
+        }
+        
+        
+        private int getSn(IByteBuffer byteBuf,ChannelConfig channelConfig){
+            var headerSize = 0;
+            if (channelConfig.Crc32Check)
+            {
+                headerSize+=Ukcp.HEADER_CRC;
+            }
+            if(channelConfig.FecDataShardCount!=0&&channelConfig.FecParityShardCount!=0){
+                headerSize+= Fec.fecHeaderSizePlus2;
+            }
+            var sn = byteBuf.GetIntLE(byteBuf.ReaderIndex+Kcp.IKCP_SN_OFFSET+headerSize);
+            return sn;
         }
 
 

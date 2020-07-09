@@ -81,6 +81,8 @@ namespace base_kcp
          * up to 120 secs to probe window
          */
         public const int IKCP_PROBE_LIMIT = 120000;
+        
+        public const int IKCP_SN_OFFSET   = 12;
 
 
         private int ackMaskSize = 0;
