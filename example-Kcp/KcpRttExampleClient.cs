@@ -107,13 +107,13 @@ namespace example_Kcp
         private void sendFunc(object source, ElapsedEventArgs e)
         {
             var byteBuf = rttMsg(++count);
-            _ukcp.writeMessage(byteBuf);
+            _ukcp.write(byteBuf);
             byteBuf.Release();
             if (count >= rtts.Length) {
                 // finish
                 timer20.Elapsed -= sendhandler;
                 byteBuf = rttMsg(-1);
-                _ukcp.writeMessage(byteBuf);
+                _ukcp.write(byteBuf);
                 byteBuf.Release();
             }
         }

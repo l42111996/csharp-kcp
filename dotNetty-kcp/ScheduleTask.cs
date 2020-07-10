@@ -28,7 +28,7 @@ namespace dotNetty_kcp
                 long now = _ukcp.currentMs();
                 //判断连接是否关闭
                 if (_ukcp.TimeoutMillis != 0 && now - _ukcp.TimeoutMillis > _ukcp.LastRecieveTime) {
-                    _ukcp.close();
+                    _ukcp.internalClose();
                 }
                 if(!_ukcp.isActive()){
                     var user = _ukcp.user();

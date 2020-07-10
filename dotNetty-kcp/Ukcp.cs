@@ -503,7 +503,7 @@ namespace dotNetty_kcp
          * @param IByteBuffer 发送后需要手动释放
          * @return
          */
-        public bool writeMessage(IByteBuffer byteBuffer)
+        public bool write(IByteBuffer byteBuffer)
         {
             byteBuffer = byteBuffer.RetainedDuplicate();
 
@@ -522,7 +522,7 @@ namespace dotNetty_kcp
         /**
          * 主动关闭连接调用
          */
-        public void notifyCloseEvent()
+        public void close()
         {
             this._iMessageExecutor.execute(new CloseTask(this));
         }
@@ -572,7 +572,7 @@ namespace dotNetty_kcp
         }
 
 
-        protected internal void close()
+        protected internal void internalClose()
         {
             _kcpListener.handleClose(this);
             _active = false;
@@ -583,7 +583,7 @@ namespace dotNetty_kcp
             _kcp.State = -1;
             _kcp.release();
 
-            IByteBuffer buffer  = null;
+            IByteBuffer buffer;
             while (_writeQueue.TryDequeue(out buffer))
             {
                 buffer.Release();
@@ -593,7 +593,6 @@ namespace dotNetty_kcp
             {
                 buffer.Release();
             }
-            Console.WriteLine("关闭");
             _fecEncode?.release();
             _fecDecode?.release();
         }

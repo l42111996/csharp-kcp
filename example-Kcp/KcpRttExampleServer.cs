@@ -31,9 +31,9 @@ namespace example_Kcp
         {
             short curCount = byteBuf.GetShort(byteBuf.ReaderIndex);
             Console.WriteLine(Thread.CurrentThread.Name+" 收到消息 "+curCount);
-            ukcp.writeMessage(byteBuf);
+            ukcp.write(byteBuf);
             if (curCount == -1) {
-                ukcp.notifyCloseEvent();
+                ukcp.close();
             }
         }
 

@@ -45,7 +45,7 @@ namespace dotNetty_kcp
                 if(channelConfig.FecDataShardCount!=0&&channelConfig.FecParityShardCount!=0){
                     convIndex+= Fec.fecHeaderSizePlus2;
                 }
-                _channelManager = new ConvChannelManager(convIndex);
+                _channelManager = new ServerConvChannelManager(convIndex);
             }else{
                 _channelManager = new ServerEndPointChannelManager();
             }
@@ -91,7 +91,7 @@ namespace dotNetty_kcp
             }
             foreach (var ukcp in _channelManager.getAll())
             {
-                ukcp.notifyCloseEvent();
+                ukcp.close();
             }
             _eventLoopGroup?.ShutdownGracefullyAsync();
             _executorPool?.stop(false);

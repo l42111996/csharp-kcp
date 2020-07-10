@@ -12,14 +12,14 @@ namespace dotNetty_kcp
     /**
      * 根据conv确定一个session
      */
-    public class ConvChannelManager : IChannelManager
+    public class ServerConvChannelManager : IChannelManager
     {
 
         private readonly ConcurrentDictionary<int, Ukcp> _ukcps = new ConcurrentDictionary<int, Ukcp>();
 
         private readonly int convIndex;
 
-        public ConvChannelManager(int convIndex)
+        public ServerConvChannelManager(int convIndex)
         {
             this.convIndex = convIndex;
         }

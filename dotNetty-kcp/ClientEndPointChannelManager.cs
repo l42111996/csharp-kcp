@@ -28,6 +28,7 @@ namespace dotNetty_kcp
             {
                 Console.WriteLine("ukcp session is not exist RemoteAddress: " + ukcp.user().RemoteAddress);
             }
+            ukcp.user().Channel.CloseAsync();
         }
 
         public ICollection<Ukcp> getAll()

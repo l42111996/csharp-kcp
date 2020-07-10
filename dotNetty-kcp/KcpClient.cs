@@ -49,7 +49,7 @@ namespace dotNetty_kcp
                 if(channelConfig.FecDataShardCount!=0&&channelConfig.FecParityShardCount!=0){
                     convIndex+= Fec.fecHeaderSizePlus2;
                 }
-                _channelManager = new ConvChannelManager(convIndex);
+                _channelManager = new ClientConvChannelManager(convIndex);
             }else{
                 _channelManager = new ClientEndPointChannelManager();
             }
@@ -86,7 +86,7 @@ namespace dotNetty_kcp
          * @param ukcp
          */
         public void reconnect(Ukcp ukcp){
-            if (!(_channelManager is ConvChannelManager))
+            if (!(_channelManager is ServerConvChannelManager))
             {
                 throw new Exception("reconnect can only be used in convChannel");
             }
@@ -160,7 +160,7 @@ namespace dotNetty_kcp
         {
             foreach (var ukcp in _channelManager.getAll())
             {
-                ukcp.notifyCloseEvent();
+                ukcp.close();
             }
             _executorPool?.stop(false);
             if (_eventLoopGroup != null&&!_eventLoopGroup.IsShuttingDown)
