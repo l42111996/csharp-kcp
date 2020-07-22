@@ -50,7 +50,7 @@ namespace dotNetty_kcp
 
         public void del(Ukcp ukcp)
         {
-            _ukcps.Remove(ukcp.getConv(), out var temp);
+            _ukcps.TryRemove(ukcp.getConv(), out var temp);
             if (temp == null)
             {
                 Console.WriteLine("ukcp session is not exist conv: " + ukcp.getConv());
