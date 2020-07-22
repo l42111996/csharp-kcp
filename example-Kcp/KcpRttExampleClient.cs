@@ -140,6 +140,12 @@ namespace example_Kcp
             return buf;
         }
 
+        public void onConnected(Ukcp ukcp)
+        {
+            
+            
+        }
+
         public void handleReceive(IByteBuffer byteBuf, Ukcp ukcp)
         {
             int curCount = byteBuf.ReadShort();

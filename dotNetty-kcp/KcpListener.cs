@@ -5,7 +5,13 @@ namespace dotNetty_kcp
 {
     public interface KcpListener
     {
-
+        
+        /**
+     * 连接之后
+     * @param ukcp
+     */
+        void onConnected(Ukcp ukcp);
+        
         /**
          * kcp message
          *

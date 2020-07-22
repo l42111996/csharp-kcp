@@ -132,6 +132,8 @@ namespace dotNetty_kcp
 
             _channelManager.New(localChannel.LocalAddress, ukcp,null);
 
+            _messageExecutor.execute(new ConnectTask(ukcp, kcpListener));
+
             var scheduleTask = new ScheduleTask( _channelManager, ukcp);
             KcpUntils.scheduleHashedWheel(scheduleTask, TimeSpan.FromMilliseconds(ukcp.getInterval()));
             return ukcp;

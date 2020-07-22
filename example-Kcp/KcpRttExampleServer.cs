@@ -27,6 +27,11 @@ namespace example_Kcp
             kcpServer.init(Environment.ProcessorCount, kcpRttExampleServer,channelConfig,20003);
         }
 
+        public void onConnected(Ukcp ukcp)
+        {
+            
+        }
+
         public void handleReceive(IByteBuffer byteBuf, Ukcp ukcp)
         {
             short curCount = byteBuf.GetShort(byteBuf.ReaderIndex);

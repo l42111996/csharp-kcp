@@ -12,6 +12,11 @@ namespace dotNetty_kcp
         private IMessageManager<T> _messageManager;
 
 
+        public void onConnected(Ukcp ukcp)
+        {
+            
+        }
+
         public void handleReceive(IByteBuffer byteBuf, Ukcp ukcp)
         {
             var message = _protoDecodeEncode.decode(byteBuf);
