@@ -18,14 +18,16 @@ namespace dotNetty_kcp
         private readonly IExecutorPool _executorPool;
 
         private readonly KcpListener _kcpListener;
+        private readonly IScheduleThread _scheduleThread;
 
 
-        public ServerChannelHandler(IChannelManager channelManager, ChannelConfig channelConfig, IExecutorPool executorPool, KcpListener kcpListener)
+        public ServerChannelHandler(IChannelManager channelManager, ChannelConfig channelConfig, IExecutorPool executorPool, KcpListener kcpListener, IScheduleThread scheduleThread)
         {
             _channelManager = channelManager;
             _channelConfig = channelConfig;
             _executorPool = executorPool;
             _kcpListener = kcpListener;
+            _scheduleThread = scheduleThread;
         }
 
         public override void ExceptionCaught(IChannelHandlerContext context, Exception exception)
@@ -77,8 +79,8 @@ namespace dotNetty_kcp
             
             ukcp.read(content);
 
-            var scheduleTask = new ScheduleTask(_channelManager,ukcp);
-            KcpUntils.scheduleHashedWheel(scheduleTask, TimeSpan.FromMilliseconds(ukcp.getInterval()));
+            var scheduleTask = new ScheduleTask(_channelManager,ukcp,_scheduleThread);
+            _scheduleThread.schedule(scheduleTask, TimeSpan.FromMilliseconds(ukcp.getInterval()));
         }
         
         

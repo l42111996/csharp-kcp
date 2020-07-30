@@ -1,7 +1,7 @@
 namespace dotNetty_kcp.thread
 {
-    public abstract class ITask
+    public interface  ITask
     {
-        public abstract void execute();
+        void execute();
     }
 }

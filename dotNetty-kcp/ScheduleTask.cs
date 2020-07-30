@@ -5,7 +5,7 @@ using dotNetty_kcp.thread;
 
 namespace dotNetty_kcp
 {
-    public class ScheduleTask:ITask,ITimerTask
+    public class ScheduleTask:IScheduleTask,ITask
     {
         private readonly IMessageExecutor _imessageExecutor;
 
@@ -13,15 +13,18 @@ namespace dotNetty_kcp
 
         private readonly Ukcp _ukcp;
 
+        private readonly IScheduleThread _scheduleThread;
 
-        public ScheduleTask(IChannelManager channelManager, Ukcp ukcp)
+
+        public ScheduleTask(IChannelManager channelManager, Ukcp ukcp, IScheduleThread scheduleThread)
         {
             _imessageExecutor = ukcp.IMessageExecutor;
             _channelManager = channelManager;
             _ukcp = ukcp;
+            _scheduleThread = scheduleThread;
         }
 
-        public override void execute()
+        public void execute()
         {
             try
             {
@@ -41,7 +44,7 @@ namespace dotNetty_kcp
                 //判断执行时间是否到了
                 if(timeLeft>0){
                     //System.err.println(timeLeft);
-                    KcpUntils.scheduleHashedWheel(this, TimeSpan.FromMilliseconds(timeLeft));
+                    _scheduleThread.schedule(this, TimeSpan.FromMilliseconds(timeLeft));
                     return;
                 }
 
@@ -49,7 +52,7 @@ namespace dotNetty_kcp
                 long next = _ukcp.flush(now);
                 //System.err.println(next);
                 //System.out.println("耗时  "+(System.currentTimeMillis()-start));
-                KcpUntils.scheduleHashedWheel(this, TimeSpan.FromMilliseconds(next));
+                _scheduleThread.schedule(this, TimeSpan.FromMilliseconds(next));
 
                 //检测写缓冲区 如果能写则触发写事件
                 if(!_ukcp.WriteQueue.IsEmpty&&_ukcp.canSend(false)
@@ -62,6 +65,11 @@ namespace dotNetty_kcp
         }
 
         public void Run(ITimeout timeout)
+        {
+            _imessageExecutor.execute(this);
+        }
+
+        public void Run()
         {
             _imessageExecutor.execute(this);
         }

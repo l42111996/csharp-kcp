@@ -26,7 +26,7 @@ namespace dotNetty_kcp
             return readTask;
         }
 
-        public override void execute()
+        public void execute()
         {
             CodecOutputList<IByteBuffer> bufList = null;
             try {

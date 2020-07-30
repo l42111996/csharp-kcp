@@ -34,7 +34,7 @@ namespace base_kcp
         }
 
 
-        public override void execute()
+        public void execute()
         {
             long now = KcpUntils.currentMs();
             if (now - start > 1000)

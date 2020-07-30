@@ -23,6 +23,8 @@ namespace dotNetty_kcp
         private readonly List<IChannel> _localAddress = new List<IChannel>();
 
         private IChannelManager _channelManager;
+        
+        private IScheduleThread _scheduleThread; 
 
 
         public void init(int workSize, KcpListener kcpListener, ChannelConfig channelConfig, params int[] ports)
@@ -54,6 +56,7 @@ namespace dotNetty_kcp
             int bindTimes = cpuNum;
 
             _eventLoopGroup = new MultithreadEventLoopGroup(cpuNum);
+            _scheduleThread = new HashedWheelScheduleThread();
 
             _bootstrap = new Bootstrap();
             //TODO epoll模型 服务器端怎么支持？得试试成功没有
@@ -65,7 +68,7 @@ namespace dotNetty_kcp
             _bootstrap.Handler(new ActionChannelInitializer<SocketDatagramChannel>(channel =>
             {
                 var pipeline = channel.Pipeline;
-                pipeline.AddLast(new ServerChannelHandler(_channelManager,channelConfig,executorPool,kcpListener));
+                pipeline.AddLast(new ServerChannelHandler(_channelManager,channelConfig,executorPool,kcpListener,_scheduleThread));
             }));
 
             foreach (var port in ports)
@@ -95,6 +98,7 @@ namespace dotNetty_kcp
             }
             _eventLoopGroup?.ShutdownGracefullyAsync();
             _executorPool?.stop(false);
+            _scheduleThread.stop();
         }
     }
 }

@@ -29,6 +29,8 @@ namespace dotNetty_kcp
 
         private IEventLoopGroup _eventLoopGroup;
 
+        private IScheduleThread _scheduleThread; 
+
 
         private static IChannel bindLocal(Bootstrap bootstrap,EndPoint localAddress = null)
         {
@@ -58,6 +60,8 @@ namespace dotNetty_kcp
             _executorPool = executorPool;
             _executorPool.CreateMessageExecutor();
             _eventLoopGroup = eventLoopGroup;
+            
+            _scheduleThread = new EventLoopScheduleThread();
 
             bootstrap = new Bootstrap();
             bootstrap.Group(_eventLoopGroup);
@@ -104,7 +108,7 @@ namespace dotNetty_kcp
                 _bootstrap = bootstrap;
             }
 
-            public override void execute()
+            public void execute()
             {
                 _ukcp.user().Channel.CloseAsync();
                 var iChannel = bindLocal(_bootstrap);
@@ -134,8 +138,9 @@ namespace dotNetty_kcp
 
             _messageExecutor.execute(new ConnectTask(ukcp, kcpListener));
 
-            var scheduleTask = new ScheduleTask( _channelManager, ukcp);
-            KcpUntils.scheduleHashedWheel(scheduleTask, TimeSpan.FromMilliseconds(ukcp.getInterval()));
+            var scheduleTask = new ScheduleTask( _channelManager, ukcp,_scheduleThread);
+            
+            _scheduleThread.schedule(scheduleTask,TimeSpan.FromMilliseconds(ukcp.getInterval()));
             return ukcp;
         }
 
@@ -169,6 +174,7 @@ namespace dotNetty_kcp
             {
                 _eventLoopGroup?.ShutdownGracefullyAsync().Wait();
             }
+            _scheduleThread.stop();
         }
     }
 }
