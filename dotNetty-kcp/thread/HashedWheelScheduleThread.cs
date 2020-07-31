@@ -3,6 +3,10 @@ using DotNetty.Common.Utilities;
 
 namespace dotNetty_kcp.thread
 {
+    /**
+     * netty的实现轮实现，在unity环境下测试会导致cpu跑到50%
+     * 服务器端使用不错
+     */
     public class HashedWheelScheduleThread:IScheduleThread
     {
         
