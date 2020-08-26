@@ -61,8 +61,7 @@ namespace dotNetty_kcp
             _bootstrap = new Bootstrap();
             //TODO epoll模型 服务器端怎么支持？得试试成功没有
             _bootstrap.Option(ChannelOption.SoReuseport, true);
-
-            _bootstrap.Option(ChannelOption.SoReuseaddr, true);
+            // _bootstrap.Option(ChannelOption.SoReuseaddr, true);
             _bootstrap.Group(_eventLoopGroup);
             _bootstrap.ChannelFactory(() => new SocketDatagramChannel(AddressFamily.InterNetwork));
             _bootstrap.Handler(new ActionChannelInitializer<SocketDatagramChannel>(channel =>
