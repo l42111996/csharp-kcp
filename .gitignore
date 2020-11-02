@@ -1,0 +1,9 @@
+example-Kcp/bin
+base-kcp/obj
+dotNetty-kcp/bin
+dotNetty-kcp/obj
+example-Kcp/obj
+kcp4game/bin
+kcp4game/obj
+base-kcp/bin
+.idea
